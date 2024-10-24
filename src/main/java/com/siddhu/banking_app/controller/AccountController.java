@@ -1,11 +1,11 @@
 package com.siddhu.banking_app.controller;
 
 import com.siddhu.banking_app.dto.AccountDto;
+
 import com.siddhu.banking_app.exceptions.NotEnoughMoney;
 import com.siddhu.banking_app.exceptions.ResourceNotFoundException;
 import com.siddhu.banking_app.response.ApiResponse;
 import com.siddhu.banking_app.service.AccountService;
-import lombok.Getter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -64,6 +64,16 @@ public class AccountController {
             AccountDto accountDto = accountService.withdraw(id,amount);
             return ResponseEntity.ok(new ApiResponse("success!",accountDto));
         } catch (NotEnoughMoney | ResourceNotFoundException e) {
+            return  ResponseEntity.status(NOT_FOUND).body(new ApiResponse(e.getMessage(), null));
+        }
+    }
+
+    @GetMapping("/{id}/balance")
+    public ResponseEntity<ApiResponse> getBalance(@PathVariable Long id){
+        try {
+            Double amount = accountService.getBalance(id);
+            return ResponseEntity.ok(new ApiResponse("Success!",amount));
+        } catch (ResourceNotFoundException e) {
             return  ResponseEntity.status(NOT_FOUND).body(new ApiResponse(e.getMessage(), null));
         }
     }

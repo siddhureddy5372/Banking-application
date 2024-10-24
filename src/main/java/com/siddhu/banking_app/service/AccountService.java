@@ -12,6 +12,7 @@ public interface AccountService {
     AccountDto deposit(Long id, double amount);
     AccountDto withdraw(Long id, double amount);
     List<AccountDto> getAllAccounts();
+    Double getBalance(Long id);
 
     void deleteAccountById(Long id);
 

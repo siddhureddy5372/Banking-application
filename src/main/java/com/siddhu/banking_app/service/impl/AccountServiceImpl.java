@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -71,6 +70,14 @@ public class AccountServiceImpl implements AccountService {
         return accounts.stream().map((account) -> AccountMapper.mapToAccountDto(account))
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public Double getBalance(Long id) {
+        Account account =  accountRepository.findById(id)
+                .orElseThrow(()-> new ResourceNotFoundException("Account does not exist!"));
+        return account.getBalance();
+    }
+
 
     @Override
     public void deleteAccountById(Long id) {
