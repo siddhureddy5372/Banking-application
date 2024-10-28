@@ -21,13 +21,11 @@ public class Transaction {
     private Long id;
 
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "sender_id", nullable = false)
-    private Account sender;
+    @Column(name = "sender", nullable = false)
+    private String senderAN;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "receiver_id", nullable = false)
-    private Account receiver;
+    @Column(name = "receiver", nullable = false)
+    private String receiverAN;
 
     private double amount;
 
@@ -37,5 +35,16 @@ public class Transaction {
     @PrePersist
     public void prePersist() {
         recordedOn = LocalDateTime.now();
+    }
+
+    @Override
+    public String toString() {
+        return "Transaction{" +
+                "id=" + id +
+                ", sender='" + senderAN + '\'' +
+                ", receiver='" + receiverAN + '\'' +
+                ", amount=" + amount +
+                ", recordedOn=" + recordedOn +
+                '}';
     }
 }

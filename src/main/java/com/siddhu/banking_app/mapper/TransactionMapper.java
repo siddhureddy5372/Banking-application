@@ -8,26 +8,25 @@ public class TransactionMapper {
 
     public static TransactionCreateDto mapToTotalDto(Transaction transaction){
         TransactionCreateDto transactionsDto = new TransactionCreateDto(
-                transaction.getSender().getId(),
-                transaction.getReceiver().getId(),
-                transaction.getAmount(),
-                transaction.getRecordedOn()
+                transaction.getSenderAN(),
+                transaction.getReceiverAN(),
+                transaction.getAmount()
         );
         return transactionsDto;
     }
-    public static TransactionDto mapToDTO(Transaction transaction, Long currentUserId) {
-        if (transaction.getSender().getId().equals(currentUserId)) {
+    public static TransactionDto mapToDTO(Transaction transaction, String currentUserAN) {
+        if (transaction.getSenderAN().equals(currentUserAN)) {
             // If the current user is the sender, return the receiver's information
             return new TransactionDto(
-                    transaction.getReceiver().getAccountHolderName(),
+                    transaction.getReceiverAN(),
                     transaction.getAmount(),
                     "sender",
                     transaction.getRecordedOn().toString()
             );
-        } else if (transaction.getReceiver().getId().equals(currentUserId)) {
+        } else if (transaction.getReceiverAN().equals(currentUserAN)) {
             // If the current user is the receiver, return the sender's information
             return new TransactionDto(
-                    transaction.getSender().getAccountHolderName(),
+                    transaction.getSenderAN(),
                     transaction.getAmount(),
                     "receiver",
                     transaction.getRecordedOn().toString()

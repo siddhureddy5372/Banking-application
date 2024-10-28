@@ -1,7 +1,10 @@
 package com.siddhu.banking_app.controller;
 
+import com.fasterxml.jackson.annotation.JsonView;
+import com.siddhu.banking_app.Views;
 import com.siddhu.banking_app.dto.AccountDto;
-
+import com.siddhu.banking_app.dto.TransactionCreateDto;
+import com.siddhu.banking_app.exceptions.AccountBlocked;
 import com.siddhu.banking_app.exceptions.NotEnoughMoney;
 import com.siddhu.banking_app.exceptions.ResourceNotFoundException;
 import com.siddhu.banking_app.response.ApiResponse;
@@ -15,6 +18,7 @@ import java.util.Map;
 
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
+
 @RestController
 @RequestMapping("${api.prefix}/accounts")
 public class AccountController {
@@ -27,14 +31,23 @@ public class AccountController {
 
     // Add Account REST API
     @PostMapping
+    @JsonView(Views.Public.class)
     public ResponseEntity<AccountDto> addAccount(@RequestBody AccountDto accountDto){
         return new ResponseEntity<>(accountService.createAccount(accountDto), HttpStatus.CREATED);
     }
 
     // Get account REST API
     @GetMapping("/{id}")
+    @JsonView(Views.Full.class)
     public ResponseEntity<AccountDto> getAccount(@PathVariable Long id){
         AccountDto accountDto = accountService.getAccountById(id);
+        return ResponseEntity.ok(accountDto);
+    }
+
+    @GetMapping("/account_number/{accountNumber}")
+    @JsonView(Views.Full.class)
+    public ResponseEntity<AccountDto> getAccountByAccountNumber(@PathVariable String accountNumber){
+        AccountDto accountDto = accountService.getAccountByAccountNumber(accountNumber);
         return ResponseEntity.ok(accountDto);
     }
 
@@ -50,9 +63,9 @@ public class AccountController {
     public ResponseEntity<ApiResponse> deposit(@PathVariable Long id, @RequestBody Map<String, Double> request){
         try {
             Double amount = request.get("amount");
-            AccountDto accountDto = accountService.deposit(id,amount);
+            TransactionCreateDto accountDto = accountService.deposit(id,amount);
             return ResponseEntity.ok(new ApiResponse("Success!",accountDto));
-        } catch (ResourceNotFoundException e) {
+        } catch (ResourceNotFoundException |IllegalArgumentException| AccountBlocked | NotEnoughMoney e) {
             return  ResponseEntity.status(NOT_FOUND).body(new ApiResponse(e.getMessage(), null));
         }
     }
@@ -61,13 +74,14 @@ public class AccountController {
     public ResponseEntity<ApiResponse> withdraw(@PathVariable Long id,@RequestBody Map<String,Double> request){
         try {
             Double amount = request.get("amount");
-            AccountDto accountDto = accountService.withdraw(id,amount);
+            TransactionCreateDto accountDto = accountService.withdraw(id,amount);
             return ResponseEntity.ok(new ApiResponse("success!",accountDto));
-        } catch (NotEnoughMoney | ResourceNotFoundException e) {
+        } catch (NotEnoughMoney |IllegalArgumentException| ResourceNotFoundException | AccountBlocked e) {
             return  ResponseEntity.status(NOT_FOUND).body(new ApiResponse(e.getMessage(), null));
         }
     }
 
+    @CrossOrigin(origins = "http://localhost:3000")
     @GetMapping("/{id}/balance")
     public ResponseEntity<ApiResponse> getBalance(@PathVariable Long id){
         try {
@@ -82,7 +96,27 @@ public class AccountController {
     public ResponseEntity<ApiResponse> deleteAccount(@PathVariable Long id){
         try {
             accountService.deleteAccountById(id);
-            return ResponseEntity.ok(new ApiResponse("Found",null));
+            return ResponseEntity.ok(new ApiResponse("Deleted!",null));
+        } catch (ResourceNotFoundException e) {
+            return  ResponseEntity.status(NOT_FOUND).body(new ApiResponse(e.getMessage(), null));
+        }
+    }
+
+    @PutMapping("/deactivate")
+    public ResponseEntity<ApiResponse> deactivateAccountByAccountNumber(@RequestParam String accountNumber){
+        try {
+            accountService.deactivateAccountByAccount(accountNumber);
+            return ResponseEntity.ok(new ApiResponse("Deactivated!",null));
+        } catch (ResourceNotFoundException e) {
+            return  ResponseEntity.status(NOT_FOUND).body(new ApiResponse(e.getMessage(), null));
+        }
+    }
+
+    @PutMapping("/reactivate")
+    public ResponseEntity<ApiResponse> reactivateAccountByAccountNumber(@RequestParam String accountNumber){
+        try {
+            accountService.reactivateAccountByAccount(accountNumber);
+            return ResponseEntity.ok(new ApiResponse("Reactivated!",null));
         } catch (ResourceNotFoundException e) {
             return  ResponseEntity.status(NOT_FOUND).body(new ApiResponse(e.getMessage(), null));
         }

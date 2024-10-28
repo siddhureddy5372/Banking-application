@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
@@ -13,6 +12,4 @@ public class TransactionDto {
     private double amount;
     private String role; // either "sender" or "receiver"
     private String recordedOn;
-
-
 }
